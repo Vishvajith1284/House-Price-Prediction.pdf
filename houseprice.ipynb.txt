@@ -1,0 +1,143 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "d43d33ec",
+   "metadata": {
+    "_cell_guid": "b1076dfc-b9ad-4769-8c92-a6c4dae69d19",
+    "_uuid": "8f2839f25d086af736a60e9eeb907d3b93b6e0e5",
+    "execution": {
+     "iopub.execute_input": "2023-10-11T19:28:42.353629Z",
+     "iopub.status.busy": "2023-10-11T19:28:42.353038Z",
+     "iopub.status.idle": "2023-10-11T19:28:42.368539Z",
+     "shell.execute_reply": "2023-10-11T19:28:42.367540Z"
+    },
+    "papermill": {
+     "duration": 0.020048,
+     "end_time": "2023-10-11T19:28:42.369675",
+     "exception": true,
+     "start_time": "2023-10-11T19:28:42.349627",
+     "status": "failed"
+    },
+    "tags": []
+   },
+   "outputs": [
+    {
+     "ename": "SyntaxError",
+     "evalue": "invalid syntax (4090836801.py, line 2)",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;36m  Cell \u001b[0;32mIn[1], line 2\u001b[0;36m\u001b[0m\n\u001b[0;31m    import matplotlib.pyplot as p lt #(To visualize the data features i.e. barplot)\u001b[0m\n\u001b[0m                                  ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd # ( To load the Data frame)\n",
+    "import matplotlib.pyplot as p lt #(To visualize the data features i.e. barplot)\n",
+    "import seaborn as sns #(To see the correlation between features using heatmap)\n",
+    "dataset = pd.read_excel(\"HousePricePrediction.xlsx\")\n",
+    "# Printing first 5 records of the dataset\n",
+    "print(dataset.head(5))\n",
+    "dataset. Shape\n",
+    "obj = (dataset. Types == 'object')\n",
+    "object_cols = list(obj[obj].index)\n",
+    "print(\"Categorical variables:\",len(object_cols))\n",
+    "int_ = (dataset. Types == 'int')\n",
+    "num_cols = list(int_[int_].index)\n",
+    "print(\"Integer variables:\",len(num_cols))\n",
+    "fl = (dataset. Types == 'float')\n",
+    "fl_cols = list(fl[fl].index)\n",
+    "print(\"Float variables:\",len(fl_cols))\n",
+    "plt.figure(figsize=(12, 6))\n",
+    "sns.heatmap(dataset.corr(),cmap = 'BrBG',fmt = '.2f',linewidths = 2,annot = True)\n",
+    "unique_values = []\n",
+    "for col in object_cols:\n",
+    "unique_values.append(dataset[col].unique().size)\n",
+    "plt.figure(figsize=(10,6))\n",
+    "plt.title('No. Unique values of Categorical Features')\n",
+    "plt.xticks(rotation=90)\n",
+    "sns.barplot(x=object_cols,y=unique_values)\n",
+    "plt.figure(figsize=(18, 36))\n",
+    "plt.title('Categorical Features: Distribution')\n",
+    "plt.xticks(rotation=90)\n",
+    "index = 1\n",
+    "for col in object_cols:\n",
+    "y = dataset[col].value_counts()\n",
+    "plt.subplot(11, 4, index)\n",
+    "plt.xticks(rotation=90)\n",
+    "sns.barplot(x=list(y.index), y=y)\n",
+    "index += 1\n",
+    "dataset. Drop(['Id'],axis=1,inplace=True)\n",
+    "dataset ['Sale Price'] = dataset['Sale Price'].fillna(dataset['Sale Price'].mean())\n",
+    "new_dataset = dataset.dropna() #(Drop records with null values)\n",
+    "new_dataset.isnull().sum() #(Checking features which have null values in new data frame)\n",
+    "from sklearn.preprocessing import OneHotEncoder\n",
+    "s = (new_dataset.dtypes == 'object')\n",
+    "object_cols = list(s[s].index)\n",
+    "print(\"Categorical variables:\")\n",
+    "print(object_cols)\n",
+    "print('No. of. categorical features: ', len(object_cols))\n",
+    "OH_encoder = OneHotEncoder(sparse=False)\n",
+    "OH_cols = pd.DataFrame(OH_encoder.fit_transform(new_dataset[object_cols]))\n",
+    "OH_cols.index = new_dataset.index\n",
+    "OH_cols.columns = OH_encoder.get_feature_names()\n",
+    "df_final = new_dataset.drop(object_cols, axis=1)\n",
+    "df_final = pd.concat([df_final, OH_cols], axis=1)\n",
+    "from sklearn.metrics \n",
+    "import mean_absolute_error\n",
+    "from sklearn.model_selection\n",
+    "import train_test_split\n",
+    "X = df_final.drop(['SalePrice'], axis=1) # Split the training set into \n",
+    "Y = df_final['SalePrice'] # training and validation set\n",
+    "X_train, X_valid = train_test_split(X, train_size=0.8, test_size=0.2, random_state=0)\n",
+    "Y_train, Y_valid = train_test_split(Y, train_size=0.8, test_size=0.2, random_state=0)\n",
+    "from sklearn import svm\n",
+    "from sklearn.svm import SVC\n",
+    "from sklearn.metrics import mean_absolute_percentage_error\n",
+    "model_SVR = svm.SVR()\n",
+    "model_SVR.fit(X_train,Y_train)\n",
+    "Y_pred = model_SVR.predict(X_valid)\n",
+    "print(mean_absolute_percentage_error(Y_valid, Y_pred))\n",
+    "from sklearn.ensemble import RandomForestRegressor\n",
+    "model_RFR = RandomForestRegressor(n_estimators=10)\n",
+    "model_RFR.fit(X_train, Y_train)\n",
+    "Y_pred = model_RFR.predict(X_valid)\n",
+    "mean_absolute_percentage_error(Y_valid, Y_pred)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.12"
+  },
+  "papermill": {
+   "default_parameters": {},
+   "duration": 3.452525,
+   "end_time": "2023-10-11T19:28:42.690086",
+   "environment_variables": {},
+   "exception": true,
+   "input_path": "__notebook__.ipynb",
+   "output_path": "__notebook__.ipynb",
+   "parameters": {},
+   "start_time": "2023-10-11T19:28:39.237561",
+   "version": "2.4.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
